@@ -650,6 +650,12 @@ func (dvd DefaultValueDecoders) MapDecodeValue(dc DecodeContext, vr bsonrw.Value
 	if !val.CanSet() || val.Kind() != reflect.Map || val.Type().Key().Kind() != reflect.String {
 		return ValueDecoderError{Name: "MapDecodeValue", Kinds: []reflect.Kind{reflect.Map}, Received: val}
 	}
+	kKind := val.Type().Key().Kind()
+	switch kKind {
+	case reflect.Interface, reflect.String, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Bool, reflect.Float32, reflect.Float64:
+	default:
+		return ValueDecoderError{Name: "MapDecodeValue", Kinds: []reflect.Kind{reflect.Map}, Received: val}
+	}
 
 	switch vr.Type() {
 	case bsontype.Type(0), bsontype.EmbeddedDocument:
@@ -696,7 +702,33 @@ func (dvd DefaultValueDecoders) MapDecodeValue(dc DecodeContext, vr bsonrw.Value
 			return err
 		}
 
-		val.SetMapIndex(reflect.ValueOf(key).Convert(keyType), elem)
+		var keyValue reflect.Value
+		switch kKind {
+		case reflect.String:
+			keyValue = reflect.ValueOf(key).Convert(keyType)
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			tmp, err := strconv.ParseUint(key, 10, 64)
+			if err != nil {
+				return ValueDecoderError{Name: "MapDecodeValue", Kinds: []reflect.Kind{reflect.Map}, Received: val}
+			}
+			keyValue = reflect.ValueOf(tmp).Convert(keyType)
+		case reflect.Float32, reflect.Float64:
+			tmp, err := strconv.ParseFloat(key, 64)
+			if err != nil {
+				return ValueDecoderError{Name: "MapDecodeValue", Kinds: []reflect.Kind{reflect.Map}, Received: val}
+			}
+			keyValue = reflect.ValueOf(tmp).Convert(keyType)
+		case reflect.Bool:
+			tmp, err := strconv.ParseBool(key)
+			if err != nil {
+				return ValueDecoderError{Name: "MapDecodeValue", Kinds: []reflect.Kind{reflect.Map}, Received: val}
+			}
+			keyValue = reflect.ValueOf(tmp).Convert(keyType)
+		default:
+			keyValue = reflect.ValueOf(fmt.Sprint()).Convert(keyType)
+		}
+
+		val.SetMapIndex(keyValue, elem)
 	}
 	return nil
 }
