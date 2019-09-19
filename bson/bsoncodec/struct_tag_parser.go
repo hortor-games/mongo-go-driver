@@ -86,8 +86,16 @@ type StructTags struct {
 // value consisting entirely of '-' will return a StructTags with Skip true and
 // the remaining fields will be their default values.
 var DefaultStructTagParser StructTagParserFunc = func(sf reflect.StructField) (StructTags, error) {
-	key := strings.ToLower(sf.Name)
+	var key string
+	if len(sf.Name) == 1 {
+		key = strings.ToLower(sf.Name)
+	} else {
+		key = strings.ToLower(sf.Name[:1]) + sf.Name[1:]
+	}
 	tag, ok := sf.Tag.Lookup("bson")
+	if !ok {
+		tag, ok = sf.Tag.Lookup("json")
+	}
 	if !ok && !strings.Contains(string(sf.Tag), ":") && len(sf.Tag) > 0 {
 		tag = string(sf.Tag)
 	}
