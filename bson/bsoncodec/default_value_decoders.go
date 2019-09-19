@@ -647,7 +647,7 @@ func (dvd DefaultValueDecoders) ByteSliceDecodeValue(dc DecodeContext, vr bsonrw
 
 // MapDecodeValue is the ValueDecoderFunc for map[string]* types.
 func (dvd DefaultValueDecoders) MapDecodeValue(dc DecodeContext, vr bsonrw.ValueReader, val reflect.Value) error {
-	if !val.CanSet() || val.Kind() != reflect.Map || val.Type().Key().Kind() != reflect.String {
+	if !val.CanSet() || val.Kind() != reflect.Map {// || val.Type().Key().Kind() != reflect.String {
 		return ValueDecoderError{Name: "MapDecodeValue", Kinds: []reflect.Kind{reflect.Map}, Received: val}
 	}
 	kKind := val.Type().Key().Kind()

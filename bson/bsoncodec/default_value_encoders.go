@@ -260,7 +260,7 @@ func (dve DefaultValueEncoders) ByteSliceEncodeValue(ec EncodeContext, vw bsonrw
 
 // MapEncodeValue is the ValueEncoderFunc for map[string]* types.
 func (dve DefaultValueEncoders) MapEncodeValue(ec EncodeContext, vw bsonrw.ValueWriter, val reflect.Value) error {
-	if !val.IsValid() || val.Kind() != reflect.Map || val.Type().Key().Kind() != reflect.String {
+	if !val.IsValid() || val.Kind() != reflect.Map {// || val.Type().Key().Kind() != reflect.String {
 		return ValueEncoderError{Name: "MapEncodeValue", Kinds: []reflect.Kind{reflect.Map}, Received: val}
 	}
 
@@ -296,10 +296,16 @@ func (dve DefaultValueEncoders) mapEncodeValue(ec EncodeContext, dw bsonrw.Docum
 
 	keys := val.MapKeys()
 	for _, key := range keys {
-		if collisionFn != nil && collisionFn(key.String()) {
+		var keyStr string
+		if key.Kind() == reflect.String {
+			keyStr = key.String()
+		} else {
+			keyStr = fmt.Sprint(key)
+		}
+		if collisionFn != nil && collisionFn(keyStr) {
 			return fmt.Errorf("Key %s of inlined map conflicts with a struct field name", key)
 		}
-		vw, err := dw.WriteDocumentElement(key.String())
+		vw, err := dw.WriteDocumentElement(keyStr)
 		if err != nil {
 			return err
 		}
