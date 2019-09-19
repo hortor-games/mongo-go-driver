@@ -896,7 +896,7 @@ func (dvd DefaultValueDecoders) EmptyInterfaceDecodeValue(dc DecodeContext, vr b
 				rtype = dc.Ancestor
 				break
 			}
-			rtype = tD
+			rtype = tM
 		case bsontype.Null:
 			val.Set(reflect.Zero(val.Type()))
 			return vr.ReadNull()
