@@ -412,6 +412,8 @@ func getOrGenerateIndexName(registry *bsoncodec.Registry, model IndexModel) (str
 			value = fmt.Sprintf("%d", elem.Value.Int64())
 		case bsontype.String:
 			value = elem.Value.StringValue()
+		case bsontype.Double:
+			value = fmt.Sprintf("%d", int64(elem.Value.Double()))
 		default:
 			return "", ErrInvalidIndexValue
 		}
