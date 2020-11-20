@@ -84,7 +84,7 @@ func (dvd DefaultValueDecoders) RegisterDefaultDecoders(rb *RegistryBuilder) {
 		RegisterTypeMapEntry(bsontype.Double, tFloat64).
 		RegisterTypeMapEntry(bsontype.String, tString).
 		RegisterTypeMapEntry(bsontype.Array, tA).
-		RegisterTypeMapEntry(bsontype.Binary, tBinary).
+		RegisterTypeMapEntry(bsontype.Binary, tByteSlice).
 		RegisterTypeMapEntry(bsontype.Undefined, tUndefined).
 		RegisterTypeMapEntry(bsontype.ObjectID, tOID).
 		RegisterTypeMapEntry(bsontype.Boolean, tBool).
